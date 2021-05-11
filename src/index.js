@@ -41,7 +41,7 @@ function createElem(tag, attrObjs) {
 
 function createCard(cardData) {
   const mainSection = createCardMain(cardData);
-  const likeSection = cardLikes(cardData.likes);
+  const likeSection = cardLikes(cardData);
   const commentSection = cardComments(cardData.comments);
   const createCommentSection = createComments();
   mainSection.append(likeSection, commentSection, createCommentSection);
@@ -57,19 +57,36 @@ function createCardMain(cardData) {
   return articleEl;
 }
 
-function cardLikes(likes) {
+function cardLikes(cardData) {
   const divMain = createElem("div", { className: "likes-section" });
   const spanLike = createElem("span", {
     className: "likes",
-    innerText: `${likes} likes`,
+    innerText: `${cardData.likes} likes`,
   });
 
   const buttonLike = createElem("button", {
     className: "like-button",
-    innerText: `♥`,
+    innerText: `Like`,
   });
   buttonLike.addEventListener("click", function () {
-    return (spanLike.innerText = likes += 1);
+    fetch(`http://localhost:3000/images/${cardData.id}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        likes: cardData.likes++,
+      }),
+    })
+      .then(function (response) {
+        return response.json();
+      })
+      .then(function (data) {
+        console.log(data);
+        console.log("Patch");
+        // Next step is to render the changes
+        // getImages();
+      });
   });
   divMain.append(spanLike, buttonLike);
   return divMain;
@@ -79,6 +96,7 @@ function cardComments(commentData) {
   const ulMain = createElem("ul", { className: "comments" });
   for (const comment of commentData) {
     let liEl = createElem("li", { innerText: comment.content });
+    liEl.innerText = comment.content;
     ulMain.append(liEl);
   }
   return ulMain;
@@ -109,11 +127,16 @@ function instaCards(cards) {
     container.append(createdCard);
   }
 }
+function getImages() {
+  container.innerHTML = "";
 
-fetch("http://localhost:3000/images")
-  .then(function (response) {
-    return response.json();
-  })
-  .then(function (details) {
-    instaCards(details);
-  });
+  fetch("http://localhost:3000/images")
+    .then(function (response) {
+      return response.json();
+    })
+    .then(function (details) {
+      console.log("Get");
+      instaCards(details);
+    });
+}
+getImages();
