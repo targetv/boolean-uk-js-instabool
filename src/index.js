@@ -61,12 +61,12 @@ function cardLikes(likes) {
   const divMain = createElem("div", { className: "likes-section" });
   const spanLike = createElem("span", {
     className: "likes",
-    innerText: `${likes}`,
+    innerText: `${likes} likes`,
   });
 
   const buttonLike = createElem("button", {
     className: "like-button",
-    innerText: `Like`,
+    innerText: `♥`,
   });
   buttonLike.addEventListener("click", function () {
     return (spanLike.innerText = likes += 1);
