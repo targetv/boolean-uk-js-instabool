@@ -28,8 +28,21 @@
 // ) {
 //   return response.json();
 // });
-
 // console.log(images);
+
+function commentCreate(comment) {
+  return fetch(`http://localhost:3000/comments`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      content: comment,
+    }),
+  }).then(function (repsonse) {
+    return response.json();
+  });
+}
 
 function createElem(tag, attrObjs) {
   const elem = document.createElement(tag);
@@ -43,7 +56,7 @@ function createCard(cardData) {
   const mainSection = createCardMain(cardData);
   const likeSection = cardLikes(cardData);
   const commentSection = cardComments(cardData.comments);
-  const createCommentSection = createComments();
+  const createCommentSection = createComments(cardData);
   mainSection.append(likeSection, commentSection, createCommentSection);
   return mainSection;
 }
@@ -75,17 +88,14 @@ function cardLikes(cardData) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        likes: cardData.likes++,
+        likes: (cardData.likes += 1),
       }),
     })
       .then(function (response) {
         return response.json();
       })
       .then(function (data) {
-        console.log(data);
-        console.log("Patch");
-        // Next step is to render the changes
-        // getImages();
+        spanLike.innerText = `${data.likes} likes`;
       });
   });
   divMain.append(spanLike, buttonLike);
@@ -94,7 +104,7 @@ function cardLikes(cardData) {
 
 function cardComments(commentData) {
   const ulMain = createElem("ul", { className: "comments" });
-  for (const comment of commentData) {
+  for (let comment of commentData) {
     let liEl = createElem("li", { innerText: comment.content });
     liEl.innerText = comment.content;
     ulMain.append(liEl);
@@ -102,18 +112,47 @@ function cardComments(commentData) {
   return ulMain;
 }
 
-function createComments() {
+function createComments(cardData) {
   const commentForm = createElem("form", { className: "comment-form" });
   const commentInput = createElem("input", {
     className: "comment-input",
     type: "text",
-    name: "comment",
+    name: "test",
     placeholder: "Add a comment...",
   });
   const commentButton = createElem("button", {
     className: "comment-button",
     type: "submit",
     innerText: "Post",
+  });
+
+  //   const userComment = {
+  //     name: commentInput.test.value,
+  //   };
+
+  commentForm.addEventListener("submit", function (event) {
+    event.preventDefault();
+
+    const comment = {
+      imageId: cardData.id,
+      content: commentInput.value,
+    };
+
+    fetch(`http://localhost:3000/comments`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        content: comment,
+      }),
+    })
+      .then(function (response) {
+        return response.json();
+      })
+      .then(function (newComment) {});
+
+    commentForm.reset();
   });
   commentForm.append(commentInput, commentButton);
   return commentForm;
@@ -128,8 +167,6 @@ function instaCards(cards) {
   }
 }
 function getImages() {
-  container.innerHTML = "";
-
   fetch("http://localhost:3000/images")
     .then(function (response) {
       return response.json();
