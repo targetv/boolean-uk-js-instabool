@@ -56,7 +56,7 @@ function createCard(cardData) {
   const mainSection = createCardMain(cardData);
   const likeSection = cardLikes(cardData);
   const commentSection = cardComments(cardData.comments);
-  const createCommentSection = createComments(cardData);
+  const createCommentSection = createComments(cardData, commentSection);
   mainSection.append(likeSection, commentSection, createCommentSection);
   return mainSection;
 }
@@ -105,14 +105,18 @@ function cardLikes(cardData) {
 function cardComments(commentData) {
   const ulMain = createElem("ul", { className: "comments" });
   for (let comment of commentData) {
-    let liEl = createElem("li", { innerText: comment.content });
-    liEl.innerText = comment.content;
-    ulMain.append(liEl);
+    singleCardComment(comment, ulMain);
   }
   return ulMain;
 }
 
-function createComments(cardData) {
+function singleCardComment(comment, ulMain) {
+  let liEl = createElem("li", { innerText: comment.content });
+  liEl.innerText = comment.content;
+  ulMain.append(liEl);
+}
+
+function createComments(cardData, commentAdd) {
   const commentForm = createElem("form", { className: "comment-form" });
   const commentInput = createElem("input", {
     className: "comment-input",
@@ -143,14 +147,14 @@ function createComments(cardData) {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        content: comment,
-      }),
+      body: JSON.stringify(comment),
     })
       .then(function (response) {
         return response.json();
       })
-      .then(function (newComment) {});
+      .then(function (newComment) {
+        singleCardComment(newComment, commentAdd);
+      });
 
     commentForm.reset();
   });
